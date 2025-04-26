@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "/backend/prisma/generates"
 }
 
 datasource db {
@@ -8,10 +9,47 @@ datasource db {
 }
 
 model User {
-  id        BigInt   @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  email     String?  @unique
+  id        BigInt     @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  email     String?    @unique
   password  String
-  phone     String?  @unique
+  phone     String?    @unique
+  updatedAt DateTime   @updatedAt
+  Message   Message[]
+  UserChat  UserChat[]
+}
+
+model Message {
+  id        BigInt   @id @default(autoincrement())
+  Chat      Chat?    @relation(fields: [chatId], references: [id])
+  chatId    BigInt?
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  BigInt
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  text      String
+}
+
+enum ChatType {
+  group
+  user_to_user
+}
+
+model Chat {
+  id       BigInt     @id @default(autoincrement())
+  messages Message[]
+  UserChat UserChat[]
+  type     ChatType   @default(user_to_user)
+
+  @@unique([id, type], name: "uniqueChatType")
+}
+
+model UserChat {
+  id     BigInt @id @default(autoincrement())
+  chat   Chat   @relation(fields: [chatId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  chatId BigInt
+  userId BigInt
+
+  @@unique([chatId, userId], name: "uniqueUserInChat")
 }
