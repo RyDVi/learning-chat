@@ -6,14 +6,14 @@ import { Socket } from 'socket.io';
 import { ExtractJwt } from 'passport-jwt';
 import { AuthService } from './auth.service';
 import { WsException } from '@nestjs/websockets';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class WsAuthService {
-  private clientsToUser = new Map<string, User>();
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly authService: AuthService,
+    private readonly redisService: RedisService,
   ) {}
 
   async login(client: Socket) {
@@ -30,27 +30,58 @@ export class WsAuthService {
 
     const user = await this.authService.validate(payload.id);
 
-    this.registerUser(client, user);
+    await this.registerUser(client, user);
   }
 
-  logout(client: Socket) {
-    this.unregisterUser(client);
+  async logout(client: Socket) {
+    await this.unregisterUser(client);
   }
 
-  validate(client: Socket) {
-    if (!this.clientsToUser.has(client.id)) {
+  private getUserCacheKey(client: Socket | string) {
+    return [
+      'clientsToUser',
+      typeof client === 'string' ? client : client.id,
+    ].join('.');
+  }
+
+  private async getCachedUserBySocketId(
+    client: Socket | string,
+  ): Promise<User | null> {
+    const cachedUser = await this.redisService.get(
+      this.getUserCacheKey(client),
+    );
+    if (!cachedUser) return null;
+
+    const parsedUser: Record<string, string> = JSON.parse(cachedUser);
+    const user: User = {
+      id: BigInt(parsedUser.id),
+      createdAt: new Date(parsedUser.createdAt),
+      updatedAt: new Date(parsedUser.updatedAt),
+      phone: parsedUser.phone,
+      email: parsedUser.email,
+      password: parsedUser.password,
+    };
+
+    return user;
+  }
+
+  async validate(client: Socket) {
+    const user = await this.getCachedUserBySocketId(client);
+    if (!user) {
       throw new WsException('User is not exist');
     }
-    const user = this.clientsToUser.get(client.id);
     (client.request as any).user = user;
     return user;
   }
 
-  private registerUser(client: Socket, user: User) {
-    this.clientsToUser.set(client.id, user);
+  private async registerUser(client: Socket | string, user: User) {
+    await this.redisService.set(
+      this.getUserCacheKey(client),
+      JSON.stringify(user),
+    );
   }
 
-  private unregisterUser(client: Socket) {
-    this.clientsToUser.delete(client.id);
+  private async unregisterUser(client: Socket | string) {
+    await this.redisService.del(this.getUserCacheKey(client));
   }
 }

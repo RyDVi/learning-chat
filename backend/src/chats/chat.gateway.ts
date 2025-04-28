@@ -14,7 +14,6 @@ import { WsAuthService } from 'src/auth/wsauth.service';
 import { WsAuthorization } from 'src/auth/decorators/wsAuthorization.decorator';
 import { WsAuthorized } from 'src/auth/decorators/wsAuthorized.decorator';
 import { WsValidationPipes } from './decorators/validation.decorator';
-import { Body } from '@nestjs/common';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -30,8 +29,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('client connected ', client.id);
   }
 
-  handleDisconnect(client: Socket) {
-    this.wsAuthService.logout(client);
+  async handleDisconnect(client: Socket) {
+    await this.wsAuthService.logout(client);
     console.log('client disconnected ', client.id);
   }
 

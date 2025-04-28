@@ -6,10 +6,10 @@ import { WsAuthService } from '../wsauth.service';
 export class WsAuthGuard implements CanActivate {
   constructor(private readonly wsAuthService: WsAuthService) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const client: Socket = context.switchToWs().getClient();
 
-    this.wsAuthService.validate(client);
+    await this.wsAuthService.validate(client);
 
     return true;
   }
