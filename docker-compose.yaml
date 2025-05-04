@@ -17,11 +17,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    command: >
-      sh -c "apk add --no-cache musl-locales &&
-            apk add --no-cache tzdata &&
-            ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &&
-            exec docker-entrypoint.sh postgres"
+    # command: >
+    #   sh -c "apk add --no-cache musl-locales &&
+    #         apk add --no-cache tzdata &&
+    #         ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime &&
+    #         exec docker-entrypoint.sh postgres"
 
   pgadmin:
     image: dpage/pgadmin4

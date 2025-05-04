@@ -19,7 +19,7 @@ async function bootstrap() {
     return this.toString() as string;
   };
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 8000);
 }
 
 void bootstrap();

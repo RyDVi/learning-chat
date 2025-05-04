@@ -1,3 +1,5 @@
-export default function Home({ children }: React.PropsWithChildren) {
+import { PropsWithChildren } from "react";
+
+export default function Page({ children }: PropsWithChildren) {
   return <>{children}</>;
 }
