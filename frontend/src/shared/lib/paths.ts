@@ -6,4 +6,6 @@ const auth = root.path("/auth");
 const login = auth.path("/login");
 const register = auth.path("/register");
 
-export { root, auth, login, register };
+const main = root.path("/main");
+
+export { root, auth, login, register, main };

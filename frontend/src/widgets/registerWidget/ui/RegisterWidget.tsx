@@ -1,8 +1,15 @@
 "use client";
-import { Register, registerValidator } from "@/src/entities/register";
+import {
+  registerUser,
+  Register,
+  registerValidator,
+} from "@/src/entities/register";
 import { NavigateToLoginButton } from "@/src/features/login";
 import { RegisterButton, RegisterForm } from "@/src/features/register";
 import { useForm } from "@/src/shared/hooks/useForm";
+import { paths } from "@/src/shared/lib";
+import { catchError } from "@/src/shared/lib/wrapError";
+import { redirect } from "next/navigation";
 
 const initialValues: Register = {
   email: "",
@@ -14,7 +21,8 @@ export const RegisterWidget = () => {
   const { getFieldProps, handleSubmit } = useForm<Register>({
     initialValues,
     validationSchema: registerValidator,
-    onSubmit: async () => null,
+    onSubmit: (data) =>
+      catchError(registerUser)(data).then(() => redirect(paths.main({}))),
   });
 
   return (

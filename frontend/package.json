@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "debug": "cross-env NODE_OPTIONS='--inspect=0.0.0.0:3001' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -15,8 +16,10 @@
     "@mui/material": "^7.0.2",
     "@mui/material-nextjs": "^7.0.2",
     "next": "15.3.1",
+    "notistack": "^3.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "set-cookie-parser": "^2.7.1",
     "static-path": "^0.0.4",
     "yup": "^1.6.1"
   },
@@ -25,6 +28,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/set-cookie-parser": "^2.4.10",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "typescript": "^5"

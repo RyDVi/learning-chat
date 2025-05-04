@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";
+import { ToastProvider } from "@/src/shared/providers/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,9 @@ export default function RootLayout({
     <html lang="en" className={roboto.variable}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

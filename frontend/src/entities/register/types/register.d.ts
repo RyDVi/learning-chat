@@ -3,3 +3,7 @@ export interface Register {
   password: string;
   repeatPassword: string;
 }
+
+export interface RegisterResponse {
+  accessToken: string;
+}
