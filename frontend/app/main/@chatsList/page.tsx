@@ -1,4 +1,9 @@
-export default function ChatsListSection({ children }: React.PropsWithChildren) {
-    return <>{children}</>;
-  }
-  
+import { ChatsWidget } from "@/src/widgets/chats";
+
+export default function ChatsListSection() {
+  return (
+    <>
+      <ChatsWidget />
+    </>
+  );
+}

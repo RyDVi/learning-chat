@@ -1,3 +1,3 @@
 export default function ChatSection({ children }: React.PropsWithChildren) {
-  return <>{children}</>;
+  return <>Чат{children}</>;
 }

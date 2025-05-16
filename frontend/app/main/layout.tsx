@@ -1,4 +1,5 @@
-import { Box, Container } from "@mui/material";
+import { ChatSocketProvider } from "@/src/entities/chat";
+import { Box, Container, Paper } from "@mui/material";
 
 export default function Layout({
   children,
@@ -10,10 +11,22 @@ export default function Layout({
   chatsList: React.ReactNode;
 }) {
   return (
-    <Container maxWidth="lg">
-      <Box>{chatsList}</Box>
-      <Box>{chat}</Box>
-      {children}
-    </Container>
+    <ChatSocketProvider>
+      <Container maxWidth="lg">
+        <Paper
+          elevation={5}
+          sx={{
+            minHeight: "80dvh",
+            display: "grid",
+            gridTemplateColumns: "minmax(300px, auto) 1fr",
+            m: 0.5,
+          }}
+        >
+          <Box>{chatsList}</Box>
+          <Paper elevation={1}>{chat}</Paper>
+          {children}
+        </Paper>
+      </Container>
+    </ChatSocketProvider>
   );
 }

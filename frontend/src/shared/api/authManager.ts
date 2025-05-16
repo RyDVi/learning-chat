@@ -9,8 +9,13 @@ export const isAuthorized = async () => (await cookies()).has("accessToken");
 
 export const refreshAccessToken = async () => {
   if (await isAuthorized()) return;
-  if (!(await cookies()).has("refreshToken")) return;
+
+  if (!(await cookies()).has("refreshToken")) {
+    console.error("refreshToken not found in cookies");
+    return;
+  }
   try {
+    // TODO: not woking
     const response = await post<{ accessToken: string }>(
       "/auth/refresh",
       {},

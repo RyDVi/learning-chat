@@ -5,6 +5,7 @@ export const proxyServerCookies = async (
   cookieNames: string[],
   response: Response
 ) => {
+  console.log(response);
   if (!response.headers.has("set-cookie")) return response;
 
   const cookieString = response.headers.get("set-cookie")!;

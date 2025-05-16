@@ -7,5 +7,6 @@ const login = auth.path("/login");
 const register = auth.path("/register");
 
 const main = root.path("/main");
+const chat = main.path("/chat/:chatId");
 
-export { root, auth, login, register, main };
+export { root, auth, login, register, main, chat };

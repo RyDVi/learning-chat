@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { getRequestUrl } from "./getRequestUrl";
 import { proxyServerCookies } from "./proxyServerCookies";
 
@@ -16,6 +17,7 @@ export const post = async <ResponseData>(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Cookie": (await cookies()).toString()
       },
       body: JSON.stringify(data),
     }).then((response) =>
