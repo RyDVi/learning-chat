@@ -3,6 +3,7 @@ import { MessageDto } from './dto/message.dto';
 import { Chat, Message, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsException } from '@nestjs/websockets';
+import { ChatsBetweenDto } from './dto/chatsBetween.dto';
 
 @Injectable()
 export class ChatService {
@@ -68,5 +69,38 @@ export class ChatService {
     const chat = await this.getOrCreateUserToUserChat(sender, receiver);
     const message = await this.createMessage(chat, messageDto, sender);
     return message;
+  }
+
+  async chatsBetween(user: User, { dateFrom, dateTo }: ChatsBetweenDto) {
+    console.log(dateFrom, dateTo);
+    const data = await this.prismaService.chat.findMany({
+      where: {
+        UserChat: {
+          some: {
+            userId: user.id,
+          },
+        },
+      },
+      include: {
+        UserChat: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        messages: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+
+    return data;
   }
 }

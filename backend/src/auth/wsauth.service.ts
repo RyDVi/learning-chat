@@ -3,7 +3,6 @@ import { JwtPayload } from './dto/payload';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { Socket } from 'socket.io';
-import { ExtractJwt } from 'passport-jwt';
 import { AuthService } from './auth.service';
 import { WsException } from '@nestjs/websockets';
 import { RedisService } from 'src/redis/redis.service';
@@ -17,7 +16,12 @@ export class WsAuthService {
   ) {}
 
   async login(client: Socket) {
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(client.request);
+    const token =
+      (client.handshake.auth.accessToken as string) ||
+      client.request.headers['authorization']?.replace(/Bearer\s+/, '') ||
+      new URLSearchParams(
+        client.request.headers.cookie?.replace(/;\s*/g, '&'),
+      ).get('accessToken');
     if (!token) throw new WsException('Invalid token');
     let payload: JwtPayload;
     try {
@@ -31,6 +35,8 @@ export class WsAuthService {
     const user = await this.authService.validate(payload.id);
 
     await this.registerUser(client, user);
+
+    return user;
   }
 
   async logout(client: Socket) {
@@ -66,7 +72,9 @@ export class WsAuthService {
   }
 
   async validate(client: Socket) {
-    const user = await this.getCachedUserBySocketId(client);
+    const user =
+      (await this.getCachedUserBySocketId(client)) ||
+      (await this.login(client));
     if (!user) {
       throw new WsException('User is not exist');
     }
