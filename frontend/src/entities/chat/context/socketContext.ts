@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import {
   ChatClientToServerEvents,
   ChatServerToClientEvents,
-} from "./chatSocket";
+} from "../types/chatSocketEvents";
 
 export interface ChatSocketContextProps {
   socket: Socket<ChatServerToClientEvents, ChatClientToServerEvents>;

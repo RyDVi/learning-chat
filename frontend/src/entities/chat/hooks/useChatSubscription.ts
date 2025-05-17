@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useChatSocket } from "./useSocket";
-import { ChatServerToClientEvents } from "./chatSocket";
+import { ChatServerToClientEvents } from "../types/chatSocketEvents";
 
 export function useChatSubscription<
   EventName extends keyof ChatServerToClientEvents

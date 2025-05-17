@@ -4,6 +4,7 @@ import { Chat, Message, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsException } from '@nestjs/websockets';
 import { ChatsBetweenDto } from './dto/chatsBetween.dto';
+import { ChatMessagesDto } from './dto/chatMessages.dto';
 
 @Injectable()
 export class ChatService {
@@ -94,6 +95,7 @@ export class ChatService {
           },
         },
         messages: {
+          take: 1,
           orderBy: {
             createdAt: 'desc',
           },
@@ -102,5 +104,23 @@ export class ChatService {
     });
 
     return data;
+  }
+
+  async getChatMessages(
+    sender: User,
+    { chatId }: ChatMessagesDto,
+  ): Promise<Message[]> {
+    const data = await this.prismaService.message.findMany({
+      where: {
+        chatId: BigInt(chatId),
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+    return data.map((message) => ({
+      ...message,
+      isCurrentUser: message.senderId === sender.id,
+    }));
   }
 }

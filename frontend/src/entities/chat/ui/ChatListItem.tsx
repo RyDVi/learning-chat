@@ -1,4 +1,5 @@
 import {
+  Avatar,
   ListItem,
   ListItemAvatar,
   ListItemProps,
@@ -18,7 +19,9 @@ export const ChatListItem: React.FC<ListItemProps & ChatListItemProps> = ({
   const lastMessage = chat.messages[0];
   return (
     <ListItem {...props}>
-      <ListItemAvatar />
+      <ListItemAvatar>
+        <Avatar />
+      </ListItemAvatar>
       <ListItemText primary={chatName} secondary={lastMessage?.text} />
       <ListItemText
         sx={{ ml: 2 }}

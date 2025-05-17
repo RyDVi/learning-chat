@@ -8,6 +8,8 @@
 //   text: string;
 // }
 
+import { Message } from "../../message/types/message";
+
 export enum ChatTypeEnum {
   group,
   user_to_user,
@@ -34,15 +36,6 @@ interface User {
 }
 
 export type ReceivedUser = Pick<User, "email" | "id" | "phone">;
-
-export interface Message {
-  id: string;
-  chatId: string;
-  senderId: string;
-  createdAt: string;
-  updatedAt: string;
-  text: string;
-}
 
 export interface ReceivedChat extends Chat {
   UserChat: UserChat[];

@@ -21,6 +21,7 @@ import {
   ChatServerToClientEvents,
 } from './constants/chat.constants';
 import { ChatsBetweenDto } from './dto/chatsBetween.dto';
+import { ChatMessagesDto } from './dto/chatMessages.dto';
 
 @WebSocketGateway({ path: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -67,5 +68,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const chats = await this.chatService.chatsBetween(sender, data);
     this.server.emit(ChatServerToClientEvents.ReceiveChats, chats);
+  }
+
+  @WsAuthorization()
+  @WsValidationPipes()
+  @SubscribeMessage(ChatClientToServerEvents.ChatMessages)
+  /**
+   * TODO: это должно быть в отдельном модуле messages, но мне впадлу его писать...
+   */
+  async handleChatMessages(
+    @WsAuthorized() sender: User,
+    @MessageBody() data: ChatMessagesDto,
+  ) {
+    const chats = await this.chatService.getChatMessages(sender, data);
+    this.server.emit(ChatServerToClientEvents.ReceiveMessages, chats);
   }
 }
