@@ -9,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Paper
           elevation={5}
           sx={{
-            minHeight: "calc(100dvh - 2rem)",
+            height: "calc(100dvh - 2rem)",
             display: "grid",
             // TODO: добавить адаптив с выбором страницы на маленьких экранах
             gridTemplateColumns: "minmax(300px, auto) 1fr",
@@ -20,8 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* TODO: по идее, это должен быть @chatsList сегмент в отдельном каталоге, но он не работает. Разобраться почему... */}
             <ChatsWidget />
           </Box>
-          <Paper elevation={1}>{children}</Paper>
-          {/* {children} */}
+          {children}
         </Paper>
       </Container>
     </ChatSocketProvider>

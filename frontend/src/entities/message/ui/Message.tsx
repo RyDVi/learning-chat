@@ -21,6 +21,11 @@ export const MessageListItem: React.FC<MessageListItemProps> = ({
               ? new Date(message.createdAt).toLocaleDateString()
               : `изменено ${new Date(message.updatedAt).toLocaleDateString()}`
           }
+          slotProps={{
+            primary: {
+              whiteSpace: "pre-line",
+            },
+          }}
         />
       </ListItem>
     </Paper>

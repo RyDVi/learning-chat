@@ -1,4 +1,3 @@
-
 export interface Message {
   id: string;
   chatId: string;
@@ -9,5 +8,10 @@ export interface Message {
 }
 
 export interface ReceivedMessage extends Message {
-    isCurrentUser: boolean;
+  isCurrentUser: boolean;
 }
+
+export type MessageForSend = Omit<
+  Message,
+  "id" | "senderId" | "createdAt" | "updatedAt"
+>;

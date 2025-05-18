@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useChatSubscription,
   useChatSocket,
@@ -13,7 +13,13 @@ export function useChatMessages(chatId: string) {
   }, [chatId, socket]);
 
   const [messages, setMessages] = useState<ReceivedMessage[]>([]);
-  useChatSubscription("receiveMessages", setMessages);
+  const handleGetMessages = useCallback(
+    (receivedMessages: ReceivedMessage[]) => {
+      setMessages((messages) => messages.concat(receivedMessages));
+    },
+    []
+  );
+  useChatSubscription("receiveMessages", handleGetMessages);
 
   return messages;
 }
