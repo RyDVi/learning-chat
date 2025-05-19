@@ -24,14 +24,18 @@ export const ChatListItem: React.FC<ListItemProps & ChatListItemProps> = ({
       </ListItemAvatar>
       <ListItemText primary={chatName} secondary={lastMessage?.text} />
       <ListItemText
-        sx={{ ml: 2 }}
+        sx={{ ml: 2, textAlign: "end" }}
         slotProps={{
           primary: {
             fontSize: "0.8rem",
             color: "textDisabled",
           },
         }}
-        primary={new Date(lastMessage?.createdAt).toLocaleDateString()}
+        primary={
+          lastMessage?.createdAt
+            ? new Date(lastMessage.createdAt).toLocaleDateString()
+            : null
+        }
         secondary={<>&shy;</>}
       />
     </ListItem>

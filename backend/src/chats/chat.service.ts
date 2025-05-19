@@ -1,39 +1,84 @@
 import { Injectable } from '@nestjs/common';
 import { MessageDto } from './dto/message.dto';
-import { Chat, Message, User } from '@prisma/client';
+import { Chat, Message, User, UserChat } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { WsException } from '@nestjs/websockets';
 import { ChatsBetweenDto } from './dto/chatsBetween.dto';
 import { ChatMessagesDto } from './dto/chatMessages.dto';
 import { MessageToChatDto } from './dto/messageToChat.dto';
+import { ChatsSearchDto } from './dto/chatsSearch.dto';
 
 @Injectable()
 export class ChatService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getOrCreateUserToUserChat(
-    firstUser: User,
-    secondUser: User,
-  ): Promise<Chat> {
-    let chat: Chat | null = await this.prismaService.chat.findFirst({
+  async getOrCreateUserToUserChat(firstUser: User, secondUser: User) {
+    let chat = await this.prismaService.chat.findFirst({
       where: {
         type: 'user_to_user',
-        UserChat: {
-          every: {
-            userId: {
-              in: [secondUser.id, firstUser.id],
+        AND: [
+          {
+            UserChat: {
+              some: {
+                userId: secondUser.id,
+              },
             },
+          },
+          {
+            UserChat: {
+              some: {
+                userId: firstUser.id,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        UserChat: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+        messages: {
+          take: 1,
+          orderBy: {
+            createdAt: 'desc',
           },
         },
       },
     });
-
     if (!chat) {
+      console.log(firstUser.id, secondUser.id);
       chat = await this.prismaService.chat.create({
         data: {
           type: 'user_to_user',
           UserChat: {
             create: [{ userId: firstUser.id }, { userId: secondUser.id }],
+          },
+        },
+        include: {
+          UserChat: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+            },
+          },
+          messages: {
+            take: 1,
+            orderBy: {
+              createdAt: 'desc',
+            },
           },
         },
       });
@@ -88,38 +133,95 @@ export class ChatService {
     return { ...data, isCurrentUser: true };
   }
 
-  async chatsBetween(user: User, { dateFrom, dateTo }: ChatsBetweenDto) {
-    console.log(dateFrom, dateTo);
-    const data = await this.prismaService.chat.findMany({
-      where: {
-        UserChat: {
-          some: {
-            userId: user.id,
-          },
-        },
-      },
-      include: {
-        UserChat: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                phone: true,
-              },
-            },
-          },
-        },
-        messages: {
-          take: 1,
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-      },
+  async chatsSearch(
+    user: User,
+    {
+      searchText,
+      onlyOfCurrentUser = false,
+    }: Partial<ChatsBetweenDto & ChatsSearchDto> & {
+      onlyOfCurrentUser?: boolean;
+    },
+  ) {
+    // const filteredChats = await this.prismaService.chat.findMany({
+    //   where: {
+    //     UserChat: {
+    //       some: {
+    //         ...(onlyOfCurrentUser
+    //           ? {
+    //               userId: user.id,
+    //             }
+    //           : {}),
+    //         ...(searchText
+    //           ? {
+    //               user: {
+    //                 OR: [
+    //                   {
+    //                     email: searchText,
+    //                   },
+    //                   {
+    //                     phone: searchText,
+    //                   },
+    //                 ],
+    //               },
+    //             }
+    //           : {}),
+    //       },
+    //     },
+    //   },
+    //   include: {
+    //     UserChat: {
+    //       include: {
+    //         user: {
+    //           select: {
+    //             id: true,
+    //             email: true,
+    //             phone: true,
+    //           },
+    //         },
+    //       },
+    //     },
+    //     messages: {
+    //       take: 1,
+    //       orderBy: {
+    //         createdAt: 'desc',
+    //       },
+    //     },
+    //   },
+    // });
+
+    const users = await this.prismaService.user.findMany({
+      where: {},
     });
 
-    return data;
+    // TODO: вообще, это некорректно, потому что оооочень медленно и займёт очень мноооого памяти, но для изучения достаточно =)
+    const chats: Record<
+      string,
+      Awaited<ReturnType<typeof this.getOrCreateUserToUserChat>>
+    > = {};
+    for (const secondUser of users) {
+      const chat = await this.getOrCreateUserToUserChat(user, secondUser);
+      chats[String(chat.id)] = chat;
+    }
+
+    const filterByCurrentChat = (chat: Chat & { UserChat: UserChat[] }) =>
+      onlyOfCurrentUser
+        ? chat.UserChat.some((userChat) => userChat.userId === user.id)
+        : true;
+    const filterBySearchText = (
+      chat: Chat & {
+        UserChat: (UserChat & { user: Pick<User, 'email' | 'phone'> })[];
+      },
+    ) =>
+      chat.UserChat.some((userChat) =>
+        searchText
+          ? userChat.user.email?.includes(searchText) ||
+            userChat.user.phone?.includes(searchText)
+          : true,
+      );
+
+    return Object.values(chats).filter(
+      (chat) => filterByCurrentChat(chat) && filterBySearchText(chat),
+    );
   }
 
   async getChatMessages(

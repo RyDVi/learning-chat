@@ -23,6 +23,7 @@ import {
 import { ChatsBetweenDto } from './dto/chatsBetween.dto';
 import { ChatMessagesDto } from './dto/chatMessages.dto';
 import { MessageToChatDto } from './dto/messageToChat.dto';
+import { ChatsSearchDto } from './dto/chatsSearch.dto';
 
 @WebSocketGateway({ path: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -67,7 +68,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WsAuthorized() sender: User,
     @MessageBody() data: ChatsBetweenDto,
   ) {
-    const chats = await this.chatService.chatsBetween(sender, data);
+    const chats = await this.chatService.chatsSearch(sender, {
+      ...data,
+      onlyOfCurrentUser: true,
+    });
+    this.server.emit(ChatServerToClientEvents.ReceiveChats, chats);
+  }
+
+  @WsAuthorization()
+  @WsValidationPipes()
+  @SubscribeMessage(ChatClientToServerEvents.ChatsSearch)
+  async handleChatsSearch(
+    @WsAuthorized() sender: User,
+    @MessageBody() data: ChatsSearchDto,
+  ) {
+    const chats = await this.chatService.chatsSearch(sender, data);
     this.server.emit(ChatServerToClientEvents.ReceiveChats, chats);
   }
 

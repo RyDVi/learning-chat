@@ -1,5 +1,5 @@
 import { ChatSocketProvider } from "@/src/entities/chat";
-import { ChatsWidget } from "@/src/widgets/chats";
+import { ChatsPage } from "@/src/pages/chatsPage";
 import { Box, Container, Paper } from "@mui/material";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -16,9 +16,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             m: "1rem",
           }}
         >
-          <Box>
+          <Box
+            sx={{
+              display: "grid",
+              width: 1,
+              gridTemplateRows: "auto 1fr",
+              height: "inherit",
+            }}
+          >
             {/* TODO: по идее, это должен быть @chatsList сегмент в отдельном каталоге, но он не работает. Разобраться почему... */}
-            <ChatsWidget />
+            <ChatsPage />
           </Box>
           {children}
         </Paper>

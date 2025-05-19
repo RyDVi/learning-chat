@@ -8,6 +8,7 @@ export interface ChatClientToServerEvents {
   chatsBetween: (data: { dateFrom: string; dateTo: string }) => void;
   chatMessages: (data: { chatId: string }) => void;
   sendMessageToChat: (data: MessageForSend) => void;
+  chatsSearch: (data: { searchText: string }) => void;
 }
 
 export interface ChatServerToClientEvents {

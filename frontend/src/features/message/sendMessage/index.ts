@@ -1,1 +1,1 @@
-export * from "./ui/sendMessageButton";
+export * from "./ui/SendMessageButton";

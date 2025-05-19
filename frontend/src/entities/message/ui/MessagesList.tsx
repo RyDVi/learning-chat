@@ -19,7 +19,7 @@ export const MessagesList: React.FC<
       setTimeout(() => {
         if (!listRef.current) return;
         listRef.current.scrollTop = 999999;
-      }, 100);
+      }, 500);
     })
   }, []);
 
@@ -37,8 +37,8 @@ export const MessagesList: React.FC<
     // Calculate how far from the bottom the scroll is
     const scrollFromBottom =
       listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight;
-    console.log(scrollFromBottom, lastTwoMessagesHeight)
-    // Scroll if the scroll position is less than the height of the new element
+    
+      // Scroll if the scroll position is less than the height of the new element
     if (scrollFromBottom < lastTwoMessagesHeight) {
       // Defer scrolling until after DOM updates
       requestAnimationFrame(() => {
