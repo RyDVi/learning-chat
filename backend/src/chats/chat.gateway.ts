@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -65,6 +66,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WsValidationPipes()
   @SubscribeMessage(ChatClientToServerEvents.ChatsBetween)
   async handleChatsBetween(
+    @ConnectedSocket() client: Socket,
     @WsAuthorized() sender: User,
     @MessageBody() data: ChatsBetweenDto,
   ) {
@@ -72,45 +74,45 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ...data,
       onlyOfCurrentUser: true,
     });
-    this.server.emit(ChatServerToClientEvents.ReceiveChats, chats);
+    client.emit(ChatServerToClientEvents.ReceiveChats, chats);
   }
 
   @WsAuthorization()
   @WsValidationPipes()
   @SubscribeMessage(ChatClientToServerEvents.ChatsSearch)
   async handleChatsSearch(
+    @ConnectedSocket() client: Socket,
     @WsAuthorized() sender: User,
     @MessageBody() data: ChatsSearchDto,
   ) {
     const chats = await this.chatService.chatsSearch(sender, data);
-    this.server.emit(ChatServerToClientEvents.ReceiveChats, chats);
+    client.emit(ChatServerToClientEvents.ReceiveChats, chats);
   }
 
-  @WsAuthorization()
-  @WsValidationPipes()
-  @SubscribeMessage(ChatClientToServerEvents.ChatMessages)
   /**
    * TODO: это должно быть в отдельном модуле messages, но мне впадлу его писать...
    */
+  @WsAuthorization()
+  @WsValidationPipes()
+  @SubscribeMessage(ChatClientToServerEvents.ChatMessages)
   async handleChatMessages(
+    @ConnectedSocket() client: Socket,
     @WsAuthorized() sender: User,
     @MessageBody() data: ChatMessagesDto,
   ) {
     const chats = await this.chatService.getChatMessages(sender, data);
-    this.server.emit(ChatServerToClientEvents.ReceiveMessages, chats);
+    client.emit(ChatServerToClientEvents.ReceiveMessages, chats);
   }
 
   @WsAuthorization()
   @WsValidationPipes()
   @SubscribeMessage(ChatClientToServerEvents.SendMessageToChat)
-  /**
-   * TODO: это должно быть в отдельном модуле messages, но мне впадлу его писать...
-   */
   async handleSendMessageToChat(
     @WsAuthorized() sender: User,
     @MessageBody() data: MessageToChatDto,
   ) {
     const message = await this.chatService.sendMessageToChat(sender, data);
+    // TODO: это необходимо заменить на комнату, а то отправляется всем пользователям
     this.server.emit(ChatServerToClientEvents.ReceiveMessages, [message]);
   }
 }
